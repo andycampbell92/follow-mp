@@ -21,7 +21,8 @@
 ],
   "dependencies": {
     "jsdom": "6.1.*",
-    "mongodb": "2.0.*"
+    "mongodb": "2.0.*",
+    "q": "1.4.*"
   },
   "devDependencies": {
   },
