@@ -1,4 +1,5 @@
 var jsdom = require('jsdom');
+var Q = require('q');
 
 var getVoteRows = function(){
     var voteRows = [];
@@ -50,14 +51,23 @@ var extractVoteData = function(){
 
 var getMPData = function(mpUrl){
     var displayAllExt = "&display=everyvote#divisions";
+    var deferred = Q.defer();
+    jsdom.env(
+        mpUrl+displayAllExt,
+        ["http://code.jquery.com/jquery.js"],
+        function (err, window) {
+            if (err) {
+                deferred.reject(new Error(err));
+            } else {
+                $ = window.jQuery;
+                extractVoteData();
+                deferred.resolve(extractVoteData());
+            };
+        }
+    );
 
+    return deferred.promise;
 };
 
-.env(
-    "http://www.publicwhip.org.uk/mp.php?mpn=Diane_Abbott&mpc=Hackney_North_and_Stoke_Newington&house=commons",
-    ["http://code.jquery.com/jquery.js"],
-    function (err, window) {
-        $ = window.jQuery;
-        console.log(extractVoteData());
-    }
-);
+getMPData("http://www.publicwhip.org.uk/mp.php?mpn=Peter_Aldous&mpc=Waveney&house=commons")
+.then(function(data){console.log(data)});
