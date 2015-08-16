@@ -1,5 +1,6 @@
 var jsdom = require('jsdom');
 var Q = require('q');
+var mongodb = require('mongodb');
 
 var getVoteRows = function(){
     var voteRows = [];
@@ -69,5 +70,37 @@ var getMPData = function(mpUrl){
     return deferred.promise;
 };
 
-getMPData("http://www.publicwhip.org.uk/mp.php?mpn=Peter_Aldous&mpc=Waveney&house=commons")
-.then(function(data){console.log(data)});
+var getVoteHash = function(voteDoc){
+    var date = voteDoc.date; 
+    return date.getUTCFullYear() + '-' + date.getUTCMonth() + '-' + date.getUTCDate() + voteDoc.subject.title;
+};
+
+var url = 'mongodb://localhost:27017/follow-mp';
+var MongoClient = mongodb.MongoClient;
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function (err, db) {
+  if (err) {
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+  } else {
+    //HURRAY!! We are connected. :)
+    console.log('Connection established to', url);
+    var mpsCollection = db.collection('mps');
+    mpsCollection.find({}).toArray(function(err, data){
+        var mpDetails = data[0];
+        console.log(mpDetails._id);
+        var voteData = getMPData(mpDetails.link)
+        .then(function(voteData){
+            var votes = {};
+            for (var i = voteData.length - 1; i >= 0; i--) {
+                var vote = voteData[i];
+                vote.hash = getVoteHash(voteData[i], mpDetails);
+                vote.voter = mpDetails._id;  
+                votes[vote.hash] = vote;
+            };
+            // console.log(Object.keys(votes));
+        });
+        db.close();
+    });
+  }
+});
