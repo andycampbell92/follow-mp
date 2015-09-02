@@ -61,7 +61,6 @@ var getMPData = function(mpUrl){
                 deferred.reject(new Error(err));
             } else {
                 $ = window.jQuery;
-                extractVoteData();
                 deferred.resolve(extractVoteData());
             };
         }
@@ -91,12 +90,14 @@ var updateVotes = function(votes, mpId, db){
         for (var i = diffHashes.length - 1; i >= 0; i--) {
             docsToInsert.push(votes[diffHashes[i]]);
         };
-        voteCollection.insert(docsToInsert, {}, function(err, doc){
-            deferred.resolve(diffHashes);
-        });
-        console.log(docsToInsert.length);
+        if (docsToInsert.length>0) {
+            voteCollection.insert(docsToInsert, {}, function(err, doc){
+                deferred.resolve(docsToInsert);
+            });
+        } else{
+            deferred.resolve(docsToInsert);
+        }
     });
-
 
     return deferred.promise;
 };
@@ -113,7 +114,7 @@ MongoClient.connect(url, function (err, db) {
     console.log('Connection established to', url);
     var mpsCollection = db.collection('mps');
     mpsCollection.find({}).toArray(function(err, data){
-        var mpDetails = data[0];
+        var mpDetails = data[1];
         var voteData = getMPData(mpDetails.link)
         .then(function(voteData){
             var votes = {};
@@ -123,7 +124,10 @@ MongoClient.connect(url, function (err, db) {
                 vote.voter = mpDetails._id;  
                 votes[vote.hash] = vote;
             };
-            updateVotes(votes, mpDetails._id, db).then(function(){
+            updateVotes(votes, mpDetails._id, db)
+            .then(function(docsInserted){
+                console.log(mpDetails.name);
+                console.log(docsInserted.length);
                 db.close();
             });
         });
