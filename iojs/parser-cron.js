@@ -76,6 +76,31 @@ var getVoteHash = function(voteDoc){
     return hashSpaces.replace(/ /g, '');
 };
 
+var updateVotes = function(votes, mpId, db){
+    var deferred = Q.defer();
+    // get all existing vote hashes for MP
+    var voteCollection = db.collection('votes');
+    voteCollection.find({'voter':mpId}, {'hash':1, '_id':0}).toArray(function(err, data){
+        var existingHashes = data.map(function(x){return x.hash});
+        var newHashes = Object.keys(votes);
+        // Get the new hashes that do not exist in DB
+        var diffHashes = newHashes.filter(function(x) { return existingHashes.indexOf(x) < 0 })
+
+        // insert votes where the hash is new
+        var docsToInsert = [];
+        for (var i = diffHashes.length - 1; i >= 0; i--) {
+            docsToInsert.push(votes[diffHashes[i]]);
+        };
+        voteCollection.insert(docsToInsert, {}, function(err, doc){
+            deferred.resolve(diffHashes);
+        });
+        console.log(docsToInsert.length);
+    });
+
+
+    return deferred.promise;
+};
+
 var url = 'mongodb://localhost:27017/followmp';
 var MongoClient = mongodb.MongoClient;
 
@@ -98,9 +123,10 @@ MongoClient.connect(url, function (err, db) {
                 vote.voter = mpDetails._id;  
                 votes[vote.hash] = vote;
             };
-            // console.log(Object.keys(votes));
+            updateVotes(votes, mpDetails._id, db).then(function(){
+                db.close();
+            });
         });
-        db.close();
     });
   }
 });
