@@ -72,10 +72,11 @@ var getMPData = function(mpUrl){
 
 var getVoteHash = function(voteDoc){
     var date = voteDoc.date; 
-    return date.getUTCFullYear() + '-' + date.getUTCMonth() + '-' + date.getUTCDate() + voteDoc.subject.title;
+    var hashSpaces = date.getUTCFullYear() + '-' + date.getUTCMonth() + '-' + date.getUTCDate() + voteDoc.subject.title;
+    return hashSpaces.replace(/ /g, '');
 };
 
-var url = 'mongodb://localhost:27017/follow-mp';
+var url = 'mongodb://localhost:27017/followmp';
 var MongoClient = mongodb.MongoClient;
 
 // Use connect method to connect to the Server
@@ -88,7 +89,6 @@ MongoClient.connect(url, function (err, db) {
     var mpsCollection = db.collection('mps');
     mpsCollection.find({}).toArray(function(err, data){
         var mpDetails = data[0];
-        console.log(mpDetails._id);
         var voteData = getMPData(mpDetails.link)
         .then(function(voteData){
             var votes = {};
