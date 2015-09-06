@@ -22,9 +22,12 @@
   "dependencies": {
     "jsdom": "6.1.*",
     "mongodb": "2.0.*",
-    "q": "1.4.*"
+    "q": "1.4.*",
+    "typescript-require": "0.2.*"
   },
   "devDependencies": {
+    "grunt": "*",
+    "grunt-typescript": "0.7.*"
   },
   "license": "MIT"
 }
