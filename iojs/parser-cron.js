@@ -114,7 +114,7 @@ MongoClient.connect(url, function (err, db) {
     console.log('Connection established to', url);
     var mpsCollection = db.collection('mps');
     mpsCollection.find({}).toArray(function(err, data){
-        var mpDetails = data[1];
+        var mpDetails = data[4];
         var voteData = getMPData(mpDetails.link)
         .then(function(voteData){
             var votes = {};
