@@ -15,7 +15,8 @@ module Parse {
 		subject: iSubject,
 		vote_group: string,
 		party_vote: string,
-		role: string
+		role: string,
+		hash: string
 	}
 
 	export class VoteGetter {
@@ -85,15 +86,23 @@ module Parse {
 			return subject;
 		}
 
+		private generateVoteHash(date, title){
+    		var hashSpaces = date.getUTCFullYear() + '-' + date.getUTCMonth() + '-' + date.getUTCDate() + title;
+			return hashSpaces.replace(/ /g, '');
+		}
+
 		private extractRowData(row){
-		    var rowNodes = this.$(row).find('td');;
+		    var rowNodes = this.$(row).find('td');
+		    var voteDate = this.parseDate(rowNodes[1]);
+		    var voteSubject = this.extractSubject(rowNodes[2]);
 			var vote: iVote = {
 				'house': rowNodes[0].innerHTML,
-				'date': this.parseDate(rowNodes[1]),
-				'subject': this.extractSubject(rowNodes[2]),
+				'date': voteDate,
+				'subject': voteSubject,
 				'vote_group': rowNodes[3].innerHTML,
 				'party_vote': rowNodes[4].innerHTML,
 				'role': rowNodes[5].innerHTML,
+				'hash': this.generateVoteHash(voteDate, voteSubject.title)
 			};
 
 			return vote; 
@@ -154,6 +163,8 @@ module MPStorage {
 
 			return deferred.promise;
 		}
+
+
 	}
 }
 

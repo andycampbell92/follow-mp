@@ -53,16 +53,22 @@ var Parse;
             };
             return subject;
         };
+        VoteParser.prototype.generateVoteHash = function (date, title) {
+            var hashSpaces = date.getUTCFullYear() + '-' + date.getUTCMonth() + '-' + date.getUTCDate() + title;
+            return hashSpaces.replace(/ /g, '');
+        };
         VoteParser.prototype.extractRowData = function (row) {
             var rowNodes = this.$(row).find('td');
-            ;
+            var voteDate = this.parseDate(rowNodes[1]);
+            var voteSubject = this.extractSubject(rowNodes[2]);
             var vote = {
                 'house': rowNodes[0].innerHTML,
-                'date': this.parseDate(rowNodes[1]),
-                'subject': this.extractSubject(rowNodes[2]),
+                'date': voteDate,
+                'subject': voteSubject,
                 'vote_group': rowNodes[3].innerHTML,
                 'party_vote': rowNodes[4].innerHTML,
-                'role': rowNodes[5].innerHTML
+                'role': rowNodes[5].innerHTML,
+                'hash': this.generateVoteHash(voteDate, voteSubject.title)
             };
             return vote;
         };
@@ -99,7 +105,6 @@ var MPStorage;
                     var query = {};
                     if (mpIds !== undefined) {
                         mpIds = mpIds.map(function (id) { return new mongodb.ObjectID(id); });
-                        console.log(mpIds);
                         query = { _id: { $in: mpIds } };
                     }
                     mpsCollection.find(query).toArray(function (err, data) {
@@ -139,6 +144,7 @@ mpCon.getMps(supportedMPS)
         var mpVoteGetter = new Parse.VoteGetter(mps[i]);
         mpVoteGetter.getVotes()
             .then(function (voteData) {
+            console.log(voteData.votes[0].hash);
             console.log(voteData.mp.name + ": " + voteData.votes.length);
         })
             .catch(function (err) {
