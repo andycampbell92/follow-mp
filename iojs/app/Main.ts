@@ -127,7 +127,7 @@ module MPStorage {
 			this.MongoClient = mongodb.MongoClient;
 		}
 
-		public getMps(){
+		public getMps(mpIds){
 			var deferred = Q.defer();
 
 			this.MongoClient.connect(this.dbUrl, function(err, db) {
@@ -136,7 +136,12 @@ module MPStorage {
 					deferred.reject(err);
 				} else {
 					var mpsCollection = db.collection('mps');
-					mpsCollection.find({}).toArray(function(err, data) {
+					var query = {};
+					if(mpIds !== undefined) {
+						mpIds = mpIds.map(function(id){return new mongodb.ObjectID(id)});
+						query = {_id:{$in:mpIds}};
+					}
+					mpsCollection.find(query).toArray(function(err, data) {
 						db.close();
 						if (err !== null) {
 							deferred.reject(err);
@@ -153,7 +158,21 @@ module MPStorage {
 }
 
 var mpCon = new MPStorage.MPConnector('mongodb://localhost:27017/followmp');
-mpCon.getMps()
+// For ease of the MVP we are only using the 10 MPS that had the largest electorate in 2015
+var supportedMPS = [
+	'55db7aea9af6d6a98621f0b5',
+	'55db7aea9af6d6a98621ef34',
+	'55db7aea9af6d6a98621eeef',
+	'55db7aea9af6d6a98621eea1',
+	'55db7aea9af6d6a98621f0bc',
+	'55db7aea9af6d6a98621f092',
+	'55db7aea9af6d6a98621ee60',
+	'55db7aea9af6d6a98621f03c',
+	'55db7aea9af6d6a98621f0a9',
+	'55db7aea9af6d6a98621eeee'
+	];
+
+mpCon.getMps(supportedMPS)
 .then(function(mps){
 	for (var i = 0; i < 10; i++){
 		var mpVoteGetter = new Parse.VoteGetter(mps[i]);
