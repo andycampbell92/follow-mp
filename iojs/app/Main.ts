@@ -164,7 +164,35 @@ module MPStorage {
 			return deferred.promise;
 		}
 
+		public updateVotes(mp, votes){
+		    var deferred = Q.defer();
 
+		    this.MongoClient.connect(this.dbUrl, function(err, db) {
+			    // get all existing vote hashes for MP
+			    var voteCollection = db.collection('votes');
+			    voteCollection.find({'voter':mpId}, {'hash':1, '_id':0}).toArray(function(err, data){
+			        var existingHashes = data.map(function(x){return x.hash});
+			        var newHashes = Object.keys(votes);
+			        // Get the new hashes that do not exist in DB
+			        var diffHashes = newHashes.filter(function(x) { return existingHashes.indexOf(x) < 0 });
+
+			        // insert votes where the hash is new
+			        var docsToInsert = [];
+			        for (var i = diffHashes.length - 1; i >= 0; i--) {
+			            docsToInsert.push(votes[diffHashes[i]]);
+			        };
+			        if (docsToInsert.length>0) {
+			            voteCollection.insert(docsToInsert, {}, function(err, doc){
+			                deferred.resolve(docsToInsert);
+			            });
+			        } else{
+			            deferred.resolve(docsToInsert);
+			        }
+			    });
+			});
+
+	    	return deferred.promise;			
+		}
 	}
 }
 
