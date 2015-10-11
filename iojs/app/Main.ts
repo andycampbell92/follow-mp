@@ -151,12 +151,12 @@ module MPStorage {
 						query = {_id:{$in:mpIds}};
 					}
 					mpsCollection.find(query).toArray(function(err, data) {
-						db.close();
 						if (err !== null) {
 							deferred.reject(err);
 						} else {
 							deferred.resolve(data);
 						}
+						db.close();
 					});
 				}
 			});
@@ -170,23 +170,31 @@ module MPStorage {
 		    this.MongoClient.connect(this.dbUrl, function(err, db) {
 			    // get all existing vote hashes for MP
 			    var voteCollection = db.collection('votes');
-			    voteCollection.find({'voter':mpId}, {'hash':1, '_id':0}).toArray(function(err, data){
+			    voteCollection.find({'voter':mp._id}, {'hash':1, '_id':0}).toArray(function(err, data){
 			        var existingHashes = data.map(function(x){return x.hash});
-			        var newHashes = Object.keys(votes);
+					var newHashes = votes.map(function(x) { return x.hash });
 			        // Get the new hashes that do not exist in DB
 			        var diffHashes = newHashes.filter(function(x) { return existingHashes.indexOf(x) < 0 });
-
 			        // insert votes where the hash is new
 			        var docsToInsert = [];
-			        for (var i = diffHashes.length - 1; i >= 0; i--) {
-			            docsToInsert.push(votes[diffHashes[i]]);
+			        for (var i = votes.length - 1; i >= 0; i--) {
+			        	if(diffHashes.indexOf(votes[i].hash) > -1){
+							votes[i].voter = mp._id;
+			            	docsToInsert.push(votes[i]);
+			        	}
 			        };
 			        if (docsToInsert.length>0) {
 			            voteCollection.insert(docsToInsert, {}, function(err, doc){
-			                deferred.resolve(docsToInsert);
+			            	if(err!==null){
+								deferred.reject(err);
+			            	} else {
+			                	deferred.resolve(docsToInsert);
+			            	}
+							db.close();
 			            });
 			        } else{
 			            deferred.resolve(docsToInsert);
+						db.close();
 			        }
 			    });
 			});
@@ -217,7 +225,13 @@ mpCon.getMps(supportedMPS)
 		var mpVoteGetter = new Parse.VoteGetter(mps[i]);
 		mpVoteGetter.getVotes()
 		.then(function(voteData){
-			console.log(voteData.mp.name + ": " + voteData.votes.length);
+			mpCon.updateVotes(voteData.mp, voteData.votes)
+			.then(function(inserted) {
+				console.log(voteData.mp.name + ' voted ' + inserted.length + ' times since last run');
+			})
+			.catch(function(err){
+				console.log(err);
+			});
 		})
 		.catch(function(err){
 			console.log(err);
