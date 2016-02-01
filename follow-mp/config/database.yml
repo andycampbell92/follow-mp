@@ -12,9 +12,11 @@ default: &default
 development:
   adapter: mysql2
   encoding: utf8
-  database: follow_mp_db
   username: root
-  socket: /opt/lampp/var/mysql/mysql.sock
+  password: 
+  database: follow_mp_db
+  host: 127.0.0.1
+  port: 3306
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
