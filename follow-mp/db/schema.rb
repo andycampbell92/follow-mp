@@ -11,19 +11,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160201211439) do
+ActiveRecord::Schema.define(version: 20160221114113) do
 
-  create_table "votes", force: :cascade do |t|
+  create_table "mps", force: :cascade do |t|
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
-    t.string   "house",      limit: 255
     t.string   "link",       limit: 255
-    t.string   "title",      limit: 255
+    t.string   "name",       limit: 255
+  end
+
+  create_table "votes", force: :cascade do |t|
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+    t.string   "house",      limit: 255
+    t.text     "link",       limit: 65535
+    t.text     "title",      limit: 65535
     t.string   "vote_group", limit: 255
     t.string   "party_vote", limit: 255
     t.string   "role",       limit: 255
-    t.string   "hash",       limit: 255
     t.datetime "date"
+    t.integer  "mp_id",      limit: 4
+    t.text     "vote_hash",  limit: 65535
   end
+
+  add_index "votes", ["mp_id"], name: "index_votes_on_mp_id", using: :btree
 
 end

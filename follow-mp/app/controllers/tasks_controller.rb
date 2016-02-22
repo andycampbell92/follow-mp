@@ -4,8 +4,25 @@ class TasksController < ApplicationController
   include MpVoteParser
 
   def updateMPVoteRecords
-    # parser = MPVoteParser.new
-    votes = retrieve_votes("http://publicwhip.org.uk/mp.php?mpn=Diane_Abbott&mpc=Hackney_North_and_Stoke_Newington&house=commons")
-    render json: votes
+  	vote_counts = {}
+  	mps = Mp.all
+    mps.each do |mp|
+    	puts mp.name
+    	begin
+		    votes = retrieve_votes(mp.link)
+		    votes.map! {|vote| Vote.new(vote)}
+		    new_votes = Vote.get_new_votes(votes, mp)
+		    new_votes.each do |vote|
+		    	vote.mp_id = mp.id
+		    	vote.save
+		    end
+		    vote_counts[mp.name] = new_votes.count
+    	rescue Exception => e
+    		vote_counts[mp.name] = 'err'
+    	end
+
+	end
+
+    render json: vote_counts
   end
 end
