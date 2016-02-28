@@ -5,6 +5,7 @@ class TasksController < ApplicationController
 
   def updateMPVoteRecords
   	vote_counts = {}
+  	# mps = Mp.where(:id => 458)
   	mps = Mp.all
     mps.each do |mp|
     	puts mp.name
