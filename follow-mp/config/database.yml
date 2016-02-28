@@ -5,18 +5,15 @@
 #   gem 'sqlite3'
 #
 default: &default
-  adapter: sqlite3
-  pool: 5
-  timeout: 5000
-
-development:
   adapter: mysql2
   encoding: utf8
+  port: 3306
+
+development:
   username: root
   password: 
   database: follow_mp_db
   host: 127.0.0.1
-  port: 3306
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -27,4 +24,7 @@ test:
 
 production:
   <<: *default
-  database: db/production.sqlite3
+  username: root
+  database: followmp
+  host: follow-mp.ckgwzcezwmsm.eu-west-1.rds.amazonaws.com
+  password: ENV["DB_PASSWORD"]
