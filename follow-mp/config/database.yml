@@ -12,7 +12,6 @@ default: &default
 development:
   <<: *default  
   username: root
-  password: 
   database: followmp
   host: 127.0.0.1
 
@@ -28,4 +27,4 @@ production:
   username: root
   database: followmp
   host: follow-mp.ckgwzcezwmsm.eu-west-1.rds.amazonaws.com
-  password: ENV["DB_PASSWORD"]
+  password: <%= ENV["DB_PASSWORD"] %>
