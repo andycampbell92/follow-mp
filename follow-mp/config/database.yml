@@ -10,9 +10,10 @@ default: &default
   port: 3306
 
 development:
+  <<: *default  
   username: root
   password: 
-  database: follow_mp_db
+  database: followmp
   host: 127.0.0.1
 
 # Warning: The database defined as "test" will be erased and
