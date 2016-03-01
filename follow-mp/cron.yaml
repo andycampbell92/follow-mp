@@ -1,0 +1,7 @@
+--- 
+cron: 
+  - 
+    name: get-vote-records
+    schedule: "1 1/3 * * *"
+    url: /tasks/updateMPVoteRecords
+version: 1
