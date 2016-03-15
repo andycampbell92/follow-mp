@@ -1,0 +1,7 @@
+--- 
+cron: 
+  - 
+    name: update-votes
+    schedule: "1 */3 * * *"
+    url: /tasks/updateMPVoteRecords
+version: 1
