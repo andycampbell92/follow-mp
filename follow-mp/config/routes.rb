@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
-  post 'tasks/updateMPVoteRecords'
+  post 'tasks/updateMPVoteRecords' => 'tasks#update_mp_vote_records'
+  post 'tasks/tweetVotes' => 'tasks#tweet_new_votes'
+  
+  get 'TwitterAuth' => 'twitter_auth#auth_url'
+  
+
   get 'health' => 'health#index'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

@@ -1,5 +1,6 @@
 class Vote < ActiveRecord::Base
     belongs_to :mp
+    has_one :twitter_credential
     validates :date, presence: true
     validates_uniqueness_of :vote_hash, :scope => :mp_id
 
@@ -18,6 +19,29 @@ class Vote < ActiveRecord::Base
         end
 
         return new_votes
+    end
+
+    def simple_vote_text
+        simple_vote = 'unknown'
+        role_lower = self.role.downcase
+        case role_lower
+            when /teller/
+                simple_vote = self.vote_group.gsub('tell', '')
+            when /unknown/
+                simple_vote = 'unknown'
+            when 'loyal'
+                simple_vote = self.party_vote
+            when 'rebel'
+                simple_vote = (self.party_vote.include? 'aye') ? 'no' : 'aye'
+            else
+                simple_vote = role_lower
+        end
+
+        if simple_vote === ''
+            byebug
+        end
+            
+        simple_vote
     end
 
     def build_vote_hash()

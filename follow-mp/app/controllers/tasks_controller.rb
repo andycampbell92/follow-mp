@@ -1,9 +1,11 @@
-require 'mp_vote_parser'
+require 'tasks/mp_vote_parser'
+require 'tasks/vote_tweeter'
 class TasksController < ApplicationController
   skip_before_action :verify_authenticity_token
   include MpVoteParser
+  include MpVoteTweeter
 
-  def updateMPVoteRecords
+  def update_mp_vote_records
   	vote_counts = {}
   	# mps = Mp.where(:id => 458)
   	mps = Mp.all
@@ -26,4 +28,20 @@ class TasksController < ApplicationController
 
     render json: vote_counts
   end
+
+  def tweet_new_votes
+  	twitterAccounts = TwitterCredential.all;
+  	twitterAccounts.each do |tc|
+  		if tc.last_vote_tweeted.nil?
+  			puts tc.mp.votes.last
+  			tc.last_vote_tweeted = tc.mp.votes.last
+  			tc.save
+  		end
+  		votes = tc.mp.votes.where('id > ?', tc.last_vote_tweeted)
+  		tweet_votes votes
+  	end
+
+  	render json: {}
+  end
+
 end

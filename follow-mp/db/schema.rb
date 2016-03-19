@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160221114113) do
+ActiveRecord::Schema.define(version: 20160319161917) do
 
   create_table "mps", force: :cascade do |t|
     t.datetime "created_at",             null: false
@@ -19,6 +19,18 @@ ActiveRecord::Schema.define(version: 20160221114113) do
     t.string   "link",       limit: 255
     t.string   "name",       limit: 255
   end
+
+  create_table "twitter_credentials", force: :cascade do |t|
+    t.string   "token",      limit: 255
+    t.string   "secret",     limit: 255
+    t.integer  "mp_id",      limit: 4
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+    t.integer  "vote_id",    limit: 4
+  end
+
+  add_index "twitter_credentials", ["mp_id"], name: "index_twitter_credentials_on_mp_id", using: :btree
+  add_index "twitter_credentials", ["vote_id"], name: "index_twitter_credentials_on_vote_id", using: :btree
 
   create_table "votes", force: :cascade do |t|
     t.datetime "created_at",               null: false
