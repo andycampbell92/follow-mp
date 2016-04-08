@@ -21,7 +21,3 @@
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-# Ignoring twitter controller only used locally
-app/controllers/twitter_auth_controller.rb
-test/controllers/twitter_auth_controller_test.rb
-

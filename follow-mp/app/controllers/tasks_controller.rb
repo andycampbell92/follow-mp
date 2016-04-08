@@ -31,6 +31,7 @@ class TasksController < ApplicationController
 
   def tweet_new_votes
   	twitterAccounts = TwitterCredential.all;
+  	all_tweets = []
   	twitterAccounts.each do |tc|
   		if tc.last_vote_tweeted.nil?
   			puts tc.mp.votes.last
@@ -38,10 +39,10 @@ class TasksController < ApplicationController
   			tc.save
   		end
   		votes = tc.mp.votes.where('id > ?', tc.last_vote_tweeted)
-  		tweet_votes votes
+  		all_tweets << tweet_votes(tc, votes)
   	end
 
-  	render json: {}
+  	render json: all_tweets
   end
 
 end
