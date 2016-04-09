@@ -16,6 +16,9 @@
 !/log/.keep
 /tmp
 
+# Ignore debugging files
+.byebug_history
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
