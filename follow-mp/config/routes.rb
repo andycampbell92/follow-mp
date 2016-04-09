@@ -3,7 +3,8 @@ Rails.application.routes.draw do
   post 'tasks/tweetVotes' => 'tasks#tweet_new_votes'
   
   get 'TwitterAuth' => 'twitter_auth#auth_url'
-  
+  get 'TwitterAccessToken' => 'twitter_auth#access_token'
+  get 'TwitterCallbackToToken' => 'twitter_auth#callback_to_token'
 
   get 'health' => 'health#index'
   # The priority is based upon order of creation: first created -> highest priority.

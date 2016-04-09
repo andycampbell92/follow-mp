@@ -1,13 +1,15 @@
 module MpVoteTweeter
     class VoteTweeter
         @@base_url = 'http://www.publicwhip.org.uk/'
-        def tweet_votes(votes)
-            tweets = votes.map {|vote| build_tweet(vote)}
+        @access_token
+
+        def initialize(twitter_credentials)
+            @access_token = prepare_access_token(twitter_credentials)
         end
 
-        def truncate_title(tweet_content, title)
-            # 140 - 25 - 1 - 1 = 113 Assume 25 chars for link, -1 because we start at 0 index and -1 because of space
-            title[0, 113 - tweet_content.length]
+        def tweet_votes(votes)
+            tweets = votes.map {|vote| build_tweet(vote)}
+            result = send_tweets(tweets)
         end
 
         def build_tweet(vote)
@@ -19,13 +21,27 @@ module MpVoteTweeter
         end
 
         def send_tweets(tweets)
-            vote_table = page.css('.votes')[0]
-            return vote_table.css('.odd') + vote_table.css('.even')
+            tweets.each { |tweet| @access_token.request(:post, "https://api.twitter.com/1.1/statuses/update.json", {status: tweet})}            
         end
 
-        private :build_tweet, :send_tweets
+        def truncate_title(tweet_content, title)
+            # 140 - 25 - 1 - 1 = 113 Assume 25 chars for link, -1 because we start at 0 index and -1 because of space
+            title[0, 113 - tweet_content.length]
+        end
+
+        def prepare_access_token(twitter_credentials)
+            consumer = OAuth::Consumer.new(Rails.application.secrets.twitter_api_key, Rails.application.secrets.twitter_api_secret, { :site => "https://api.twitter.com", :scheme => :header })
+             
+            # now create the access token object from passed values
+            token_hash = { :oauth_token => twitter_credentials.token, :oauth_token_secret => twitter_credentials.secret }
+            access_token = OAuth::AccessToken.from_hash(consumer, token_hash )
+         
+            return access_token
+        end
+
+        private :build_tweet, :send_tweets, :truncate_title, :prepare_access_token
     end
-        def tweet_votes(votes)
-            return VoteTweeter.new().tweet_votes(votes)
+        def tweet_votes(twitter_credentials, votes)
+            return VoteTweeter.new(twitter_credentials).tweet_votes(votes)
         end
 end
